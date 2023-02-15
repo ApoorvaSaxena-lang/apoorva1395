@@ -1,0 +1,93 @@
+<html>
+<head>
+<title>database.dart</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #a9b7c6;}
+.s1 { color: #6a8759;}
+.s2 { color: #cc7832;}
+.s3 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+database.dart</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">'package:path/path.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:sqflite/sqflite.dart'</span><span class="s2">;</span>
+
+<span class="s0">import </span><span class="s1">'../Utils/attendance.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'../Utils/user_info.dart'</span><span class="s2">;</span>
+
+<span class="s2">const </span><span class="s0">String userInfoTable = </span><span class="s1">'UserInfo'</span><span class="s2">;</span>
+<span class="s2">const </span><span class="s0">String attendanceTable = </span><span class="s1">'AttendanceTable'</span><span class="s2">;</span>
+
+<span class="s2">class </span><span class="s0">MyDatabase {</span>
+  <span class="s0">static late Database db</span><span class="s2">;</span>
+
+  <span class="s0">static Future&lt;</span><span class="s2">void</span><span class="s0">&gt; initDb() async {</span>
+    <span class="s2">var </span><span class="s0">databasesPath = await getDatabasesPath()</span><span class="s2">;</span>
+    <span class="s0">String path = join(databasesPath</span><span class="s2">, </span><span class="s1">'attendance_tracker.db'</span><span class="s0">)</span><span class="s2">;</span>
+    <span class="s0">db = await openDatabase(path</span><span class="s2">, </span><span class="s0">version: </span><span class="s3">1</span><span class="s2">,</span>
+        <span class="s0">onCreate: (Database db</span><span class="s2">, </span><span class="s0">int version) async {</span>
+      <span class="s0">await db.execute(</span>
+          <span class="s1">'CREATE TABLE </span><span class="s0">$userInfoTable </span><span class="s1">(id INTEGER PRIMARY KEY, name TEXT, email TEXT, phone TEXT, password TEXT, image TEXT, dob TEXT)'</span><span class="s0">)</span><span class="s2">;</span>
+      <span class="s0">await db.execute(</span>
+          <span class="s1">'CREATE TABLE </span><span class="s0">$attendanceTable </span><span class="s1">(id INTEGER PRIMARY KEY, name TEXT, check_in TEXT, check_out TEXT, total_duration TEXT, date TEXT)'</span><span class="s0">)</span><span class="s2">;</span>
+    <span class="s0">})</span><span class="s2">;</span>
+  <span class="s0">}</span>
+
+  <span class="s0">static Future&lt;List&lt;Attendance&gt;&gt; getAttendanceList() async {</span>
+    <span class="s0">List&lt;Map&gt; data = await db.query(attendanceTable)</span><span class="s2">;</span>
+
+    <span class="s0">List&lt;Attendance&gt; attendanceList = []</span><span class="s2">;</span>
+
+    <span class="s2">for </span><span class="s0">(</span><span class="s2">var </span><span class="s0">map </span><span class="s2">in </span><span class="s0">data) {</span>
+      <span class="s0">attendanceList.add(Attendance(map[</span><span class="s1">&quot;name&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">&quot;check_in&quot;</span><span class="s0">]</span><span class="s2">,</span>
+          <span class="s0">map[</span><span class="s1">&quot;check_out&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">&quot;total_duration&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">&quot;date&quot;</span><span class="s0">]))</span><span class="s2">;</span>
+    <span class="s0">}</span>
+    <span class="s2">return </span><span class="s0">attendanceList</span><span class="s2">;</span>
+  <span class="s0">}</span>
+
+  <span class="s0">static Future&lt;int&gt; addAttendance(Attendance attendance) async {</span>
+    <span class="s0">int id = await db.insert(attendanceTable</span><span class="s2">, </span><span class="s0">attendance.toJson())</span><span class="s2">;</span>
+    <span class="s2">return </span><span class="s0">id</span><span class="s2">;</span>
+  <span class="s0">}</span>
+
+  <span class="s0">static Future&lt;int&gt; updateAttendance(</span>
+      <span class="s0">Attendance attendance</span><span class="s2">, </span><span class="s0">int attendanceId) async {</span>
+    <span class="s0">int id = await db.update(attendanceTable</span><span class="s2">, </span><span class="s0">attendance.toJson()</span><span class="s2">,</span>
+        <span class="s0">where: </span><span class="s1">'id = ?'</span><span class="s2">, </span><span class="s0">whereArgs: [attendanceId])</span><span class="s2">;</span>
+    <span class="s2">return </span><span class="s0">id</span><span class="s2">;</span>
+  <span class="s0">}</span>
+
+  <span class="s0">static Future&lt;List&lt;UserInfo&gt;&gt; getUserInfo(String email) async {</span>
+    <span class="s0">List&lt;Map&gt; data = await (email.isEmpty</span>
+        <span class="s0">? db.query(userInfoTable)</span>
+        <span class="s0">: db.query(userInfoTable</span><span class="s2">, </span><span class="s0">where: </span><span class="s1">&quot;email = ?&quot;</span><span class="s2">, </span><span class="s0">whereArgs: [email]))</span><span class="s2">;</span>
+
+    <span class="s0">List&lt;UserInfo&gt; userList = []</span><span class="s2">;</span>
+
+    <span class="s2">for </span><span class="s0">(</span><span class="s2">var </span><span class="s0">map </span><span class="s2">in </span><span class="s0">data) {</span>
+      <span class="s0">userList.add(UserInfo(map[</span><span class="s1">&quot;name&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">&quot;email&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">&quot;phone&quot;</span><span class="s0">]</span><span class="s2">,</span>
+          <span class="s0">map[</span><span class="s1">&quot;password&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">&quot;image&quot;</span><span class="s0">]</span><span class="s2">, </span><span class="s0">map[</span><span class="s1">'dob'</span><span class="s0">]))</span><span class="s2">;</span>
+    <span class="s0">}</span>
+    <span class="s2">return </span><span class="s0">userList</span><span class="s2">;</span>
+  <span class="s0">}</span>
+
+  <span class="s0">static Future&lt;int&gt; addUserInfo(UserInfo userInfo) async {</span>
+    <span class="s0">int id = await db.insert(userInfoTable</span><span class="s2">, </span><span class="s0">userInfo.toJson())</span><span class="s2">;</span>
+    <span class="s2">return </span><span class="s0">id</span><span class="s2">;</span>
+  <span class="s0">}</span>
+
+  <span class="s0">static Future&lt;int&gt; updateUserInfo(UserInfo userInfo) async {</span>
+    <span class="s0">int id = await db.update(userInfoTable</span><span class="s2">, </span><span class="s0">userInfo.toJson()</span><span class="s2">,</span>
+        <span class="s0">where: </span><span class="s1">'email = ?'</span><span class="s2">, </span><span class="s0">whereArgs: [userInfo.email])</span><span class="s2">;</span>
+    <span class="s2">return </span><span class="s0">id</span><span class="s2">;</span>
+  <span class="s0">}</span>
+<span class="s0">}</span>
+</pre>
+</body>
+</html>
