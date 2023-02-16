@@ -233,12 +233,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         currentUserInfo.password, imgPath, dob.text);
 
     MyDatabase.updateUserInfo(currentUserInfo);
-    // Navigator.pushAndRemoveUntil(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) => const SignUpScreen(),
-    //     ),
-    //     (route) => false);
     showMessage(context, "Information saved successfully");
   }
 

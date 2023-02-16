@@ -383,6 +383,11 @@ getAttendanceData() async {
             .difference(DateTime.parse(_attendanceList.last.date))
             .inDays <
         1;
+    Attendance attendance = _attendanceList.last;
+
+    checkedInTime = attendance.checkIn;
+    checkedOutTime = attendance.checkOut;
+    totalDuration.value = attendance.totalDuration;
   } else {
     isDone = false;
   }

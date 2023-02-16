@@ -68,21 +68,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             : null,
                       ),
                     ),
-                    // Positioned(
-                    //     top: size.height * 10,
-                    //     right: size.width * 32.5,
-                    //     child: InkWell(
-                    //       onTap: _pickImage,
-                    //       child: CircleAvatar(
-                    //         backgroundColor: Colors.black.withOpacity(.5),
-                    //         radius: size.height * 2,
-                    //         child: Icon(
-                    //           Icons.edit,
-                    //           color: Colors.white,
-                    //           size: size.height * 2.5,
-                    //         ),
-                    //       ),
-                    //     ))
                   ],
                 ),
               ),
@@ -325,14 +310,5 @@ class _SignUpScreenState extends State<SignUpScreen> {
         });
       }
     });
-  }
-
-  _pickImage() async {
-    XFile? xFile = await imagePicker.pickImage(source: ImageSource.gallery);
-    if (xFile != null) {
-      setState(() {
-        imgPath = xFile.path;
-      });
-    }
   }
 }
